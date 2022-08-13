@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-func downloader(filepath string, url string) (err error) {
+func downloader(filepath string, url string)  error{
 
 	// Create the file
 	out, err := os.Create(filepath)
