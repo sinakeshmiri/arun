@@ -23,7 +23,7 @@ func builder(filepath string) error {
 	if err != nil {
 		return err
 	}
-	cmd = exec.Command("go", "build", "main.go")
+	cmd = exec.Command("go", "build", "-o bin.elf","main.go")
 	err = cmd.Run()
 	if err != nil {
 		return err
