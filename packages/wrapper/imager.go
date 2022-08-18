@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,11 +14,11 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func imager() {
+func imageMacker() error {
 	ctx := context.Background()
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		log.Fatal(err, " :unable to init client")
+		return err
 	}
 
 	buf := new(bytes.Buffer)
@@ -31,7 +32,7 @@ func imager() {
 	}
 	readDockerFile, err := ioutil.ReadAll(dockerFileReader)
 	if err != nil {
-		log.Fatal(err, " :unable to read dockerfile")
+		return err
 	}
 
 	tarHeader := &tar.Header{
@@ -40,11 +41,11 @@ func imager() {
 	}
 	err = tw.WriteHeader(tarHeader)
 	if err != nil {
-		log.Fatal(err, " :unable to write tar header")
+		return err
 	}
 	_, err = tw.Write(readDockerFile)
 	if err != nil {
-		log.Fatal(err, " :unable to write tar body")
+		return err
 	}
 	dockerFileTarReader := bytes.NewReader(buf.Bytes())
 
@@ -56,11 +57,21 @@ func imager() {
 			Dockerfile: dockerFile,
 			Remove:     true})
 	if err != nil {
-		log.Fatal(err, " :unable to build docker image")
+		return err
 	}
 	defer imageBuildResponse.Body.Close()
 	_, err = io.Copy(os.Stdout, imageBuildResponse.Body)
 	if err != nil {
-		log.Fatal(err, " :unable to read image build response")
+		return err
 	}
+	return nil
+}
+
+func dockerfileMaker(binLocation string) string {
+	return fmt.Sprintf("FROM scratch\nADD %s /\nCMD ['/bin.elf']", binLocation)
+}
+
+func imager(binLocation string) error {
+	
+	return nil
 }
