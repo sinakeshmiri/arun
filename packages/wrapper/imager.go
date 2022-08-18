@@ -1,77 +1,104 @@
 package wrapper
 
 import (
-	"archive/tar"
-	"bytes"
+	"bufio"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"os"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/archive"
+	"github.com/sinakeshmiri/arun/packages/config"
 )
 
-func imageMacker() error {
-	ctx := context.Background()
-	cli, err := client.NewEnvClient()
+type ErrorLine struct {
+	Error       string      `json:"error"`
+	ErrorDetail ErrorDetail `json:"errorDetail"`
+}
+
+type ErrorDetail struct {
+	Message string `json:"message"`
+}
+
+func imageMacker(dockerClient *client.Client, fdt config.Lamda, buildEnv string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*120)
+	defer cancel()
+
+	tar, err := archive.TarWithOptions(fdt.Funcname, &archive.TarOptions{})
 	if err != nil {
 		return err
 	}
 
-	buf := new(bytes.Buffer)
-	tw := tar.NewWriter(buf)
-	defer tw.Close()
-
-	dockerFile := "myDockerfile"
-	dockerFileReader, err := os.Open("/path/to/dockerfile")
-	if err != nil {
-		log.Fatal(err, " :unable to open Dockerfile")
+	opts := types.ImageBuildOptions{
+		Dockerfile: "Dockerfile",
+		Tags:       []string{fdt.Username + "/" + fdt.Funcname},
+		Remove:     true,
 	}
-	readDockerFile, err := ioutil.ReadAll(dockerFileReader)
+	res, err := dockerClient.ImageBuild(ctx, tar, opts)
 	if err != nil {
 		return err
 	}
 
-	tarHeader := &tar.Header{
-		Name: dockerFile,
-		Size: int64(len(readDockerFile)),
-	}
-	err = tw.WriteHeader(tarHeader)
-	if err != nil {
-		return err
-	}
-	_, err = tw.Write(readDockerFile)
-	if err != nil {
-		return err
-	}
-	dockerFileTarReader := bytes.NewReader(buf.Bytes())
+	defer res.Body.Close()
 
-	imageBuildResponse, err := cli.ImageBuild(
-		ctx,
-		dockerFileTarReader,
-		types.ImageBuildOptions{
-			Context:    dockerFileTarReader,
-			Dockerfile: dockerFile,
-			Remove:     true})
+	err = print(res.Body)
 	if err != nil {
 		return err
 	}
-	defer imageBuildResponse.Body.Close()
-	_, err = io.Copy(os.Stdout, imageBuildResponse.Body)
-	if err != nil {
+
+	return nil
+}
+func print(rd io.Reader) error {
+	var lastLine string
+
+	scanner := bufio.NewScanner(rd)
+	for scanner.Scan() {
+		lastLine = scanner.Text()
+		fmt.Println(scanner.Text())
+	}
+
+	errLine := &ErrorLine{}
+	json.Unmarshal([]byte(lastLine), errLine)
+	if errLine.Error != "" {
+		return errors.New(errLine.Error)
+	}
+
+	if err := scanner.Err(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func dockerfileMaker(binLocation string) string {
-	return fmt.Sprintf("FROM scratch\nADD %s /\nCMD ['/bin.elf']", binLocation)
+func dockerfileMaker(buildEnv string) error {
+	dockerFile := []byte(fmt.Sprintf("FROM scratch\nADD %s/bin.elf /\nCMD ['/bin.elf']", buildEnv))
+	return os.WriteFile(buildEnv+"dockerFile", dockerFile, 0644)
+
 }
 
-func imager(binLocation string) error {
-	
+func imager(buildEnv string) error {
+	fmt.Println("EEE")
+	var f config.Lamda
+	f.Username = "sina"
+	f.Funcname = "myfunc"
+	err := dockerfileMaker(buildEnv)
+	fmt.Println("EEE")
+	if err != nil {
+		return err
+	}
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	err = imageMacker(cli, f, buildEnv)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -2,6 +2,7 @@ package wrapper
 
 import (
 	"archive/zip"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -21,11 +22,13 @@ func builder(filepath string) error {
 	cmd = exec.Command("go", "mod", "tidy")
 	err = cmd.Run()
 	if err != nil {
+		fmt.Println(err.Error)
 		return err
 	}
-	cmd = exec.Command("go", "build", "-o bin.elf","main.go")
+	cmd = exec.Command("go", "build", "-o", "bin.elf", "main.go")
 	err = cmd.Run()
 	if err != nil {
+		fmt.Println(err.Error)
 		return err
 	}
 	return nil
@@ -37,14 +40,22 @@ func Make(zipPath string) error {
 	buildEnv = "/tmp/arun-builder-" + buildEnv
 	err := os.Mkdir(buildEnv, os.ModePerm)
 	if err != nil {
+		fmt.Println(err.Error)
 		return err
 	}
 	err = unzip(zipPath, buildEnv)
 	if err != nil {
+		fmt.Println(err.Error)
 		return err
 	}
 	err = builder(buildEnv)
+	//fmt.Println(err.Error)
 	if err != nil {
+		return err
+	}
+	err = imager(buildEnv)
+	if err != nil {
+		//fmt.Println(err.Error)
 		return err
 	}
 	return nil
