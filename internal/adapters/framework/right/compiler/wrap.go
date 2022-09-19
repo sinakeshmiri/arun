@@ -1,8 +1,8 @@
-package wrapper
+package compiler
 
 import (
 	"archive/zip"
-	"fmt"
+
 	"io"
 	"os"
 	"os/exec"
@@ -13,57 +13,53 @@ import (
 )
 
 func builder(filepath string) error {
+
 	os.Chdir(filepath)
-	cmd := exec.Command("go", "mod", "init", "arun.dev/builder/function")
+	cmd := exec.Command("go", "mod", "tidy")
 	err := cmd.Run()
 	if err != nil {
+
 		return err
 	}
-	cmd = exec.Command("go", "mod", "tidy")
+	cmd = exec.Command("go", "build", "-o", "app", "main.go")
 	err = cmd.Run()
 	if err != nil {
-		fmt.Println(err.Error)
-		return err
-	}
-	cmd = exec.Command("go", "build", "-o", "bin.elf", "main.go")
-	err = cmd.Run()
-	if err != nil {
-		fmt.Println(err.Error)
+
 		return err
 	}
 	return nil
 }
 
-func Make(zipPath string) error {
-	buildEnv := uuid.New().String()
-
-	buildEnv = "/tmp/arun-builder-" + buildEnv
+func Make(src string) (string, error) {
+	rnd := uuid.New().String()
+	buildEnv := "/tmp/arun-builder-" + rnd
 	err := os.Mkdir(buildEnv, os.ModePerm)
 	if err != nil {
-		fmt.Println(err.Error)
-		return err
+
+		return "", err
 	}
-	err = unzip(zipPath, buildEnv)
+	err = unzip("./wrap.zip", buildEnv)
 	if err != nil {
-		fmt.Println(err.Error)
-		return err
+
+		return "", err
+	}
+	d1 := []byte(src)
+	err = os.WriteFile(buildEnv+"/packages/function/fucntion.go", d1, 0644)
+	if err != nil {
+
+		return "", err
 	}
 	err = builder(buildEnv)
-	//fmt.Println(err.Error)
+
 	if err != nil {
-		return err
+		return "", err
 	}
-	err = imager(buildEnv)
-	if err != nil {
-		//fmt.Println(err.Error)
-		return err
-	}
-	return nil
+	return buildEnv + "/app", nil
 }
 
-func unzip(src string, dest string) error {
+func unzip(wrp string, dest string) error {
 	var filenames []string
-	reader, err := zip.OpenReader(src)
+	reader, err := zip.OpenReader(wrp)
 	if err != nil {
 		return err
 	}
