@@ -1,4 +1,4 @@
-package db
+package fs
 
 import (
 	"log"

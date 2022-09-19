@@ -87,17 +87,17 @@ func (da Adapter) CheckName(name string) error {
 	return nil
 }
 
-func (da Adapter) GetFunction(name string) (string, error) {
+func (da Adapter) GetFunction(name string) (string,time.Duration, error) {
 	function := sq.Select("*").From("functions")
 	active := function.Where(sq.Eq{"name": name})
 	queryString, args, err := active.ToSql()
 	if err != nil {
-		return "", err
+		return "",time.Duration(0), err
 	}
 
 	rows, err := da.db.Query(queryString, args...)
 	if err != nil {
-		return "", err
+		return "",time.Duration(0), err
 	}
 	n := ""
 	n2 := ""
@@ -106,5 +106,5 @@ func (da Adapter) GetFunction(name string) (string, error) {
 		rows.Scan(&n, &n2, &n3)
 	}
 
-	return n, nil
+	return n2,n3,nil
 }

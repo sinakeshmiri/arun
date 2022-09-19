@@ -1,14 +1,12 @@
 package http
 
 import (
+	"log"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sinakeshmiri/arun/internal/ports"
-
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
+
 /*type APIPort interface {
 	AddFunction(name string ,source string) (error)
 	RunFunction(name string) (time.Duration, error)
@@ -26,10 +24,14 @@ func NewAdapter(api ports.APIPort) *Adapter {
 
 func (httpa Adapter) Run() {
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
-	http.ListenAndServe(":80", r)
+	// Starts a new Gin instance with no middle-ware
+	r := gin.New()
+
+	// Define your handlers
+	r.POST("/add", httpa.AddFunction)
+	r.Any("/:path", httpa.RunFunction)
+
+	if err := r.Run(); err != nil {
+		log.Printf("Error: %v", err)
+	}
 }

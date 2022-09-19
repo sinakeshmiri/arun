@@ -1,4 +1,4 @@
-package arithmetic
+package function
 
 // Arith impliments the Function interface
 type Function struct {
