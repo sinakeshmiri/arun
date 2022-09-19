@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 
@@ -75,13 +76,35 @@ func (da Adapter) CheckName(name string) error {
 		return err
 	}
 	n := ""
-	n2  :=  ""
+	n2 := ""
 	n3 := time.Duration(0)
 	for rows.Next() {
 		rows.Scan(&n, &n2, &n3)
 	}
 	if n != "" {
-		return err
+		return errors.New("function name already taken")
 	}
 	return nil
+}
+
+func (da Adapter) GetFunction(name string) (string, error) {
+	function := sq.Select("*").From("functions")
+	active := function.Where(sq.Eq{"name": name})
+	queryString, args, err := active.ToSql()
+	if err != nil {
+		return "", err
+	}
+
+	rows, err := da.db.Query(queryString, args...)
+	if err != nil {
+		return "", err
+	}
+	n := ""
+	n2 := ""
+	n3 := time.Duration(0)
+	for rows.Next() {
+		rows.Scan(&n, &n2, &n3)
+	}
+
+	return n, nil
 }

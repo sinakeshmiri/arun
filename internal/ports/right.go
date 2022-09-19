@@ -8,6 +8,7 @@ import (
 type DbPort interface {
 	CloseDbConnection()
 	SaveFunction(name string, binary string, cost time.Duration) error
+	GetFunction(name string) (string,error)
 	CheckName(name string)error
 }
 
