@@ -33,7 +33,7 @@ func (httpa Adapter) RunFunction(c *gin.Context) {
 	fName := req.Header["X-Func"][0]
 	pod, err := httpa.api.RunFunction(fName)
 	if err != nil {
-		log.Printf("couldn't run the pod", err)
+		fmt.Println("couldn't run the pod", err)
 		c.String(500, "error")
 		return
 	}
