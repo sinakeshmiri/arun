@@ -27,11 +27,12 @@ func NewAdapter(configPath string) (*Adapter, error) {
 }
 
 func (da Adapter) Run(binary string) (string, error) {
-	image := "ubuntu:latest"
-	jname := uuid.New().String()
+	image := "quay.io/libpod/ubuntu"
+	jname := "arun"+uuid.New().String()
 	name,err:=launchK8sJob(da.orc, &jname, &image, binary)
 	if err != nil {
 		return "", err
 	}
+	createSvc(da.orc, jname)
 	return name,nil
 }

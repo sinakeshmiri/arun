@@ -1,6 +1,35 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
+	fs "github.com/sinakeshmiri/arun/internal/adapters/framework/right/fs"
+	orc "github.com/sinakeshmiri/arun/internal/adapters/framework/right/orchestrator"
+)
+
+func main() {
+	e, err := orc.NewAdapter("./config")
+	if err != nil {
+		log.Fatal(err)
+	}
+	x, err := fs.NewAdapter("http://172.25.83.242:1080/files/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	t, err := x.SaveBinary("/root/projects/t/app")
+	if err != nil {
+		log.Fatal(err)
+	}
+	xx, err := e.Run(t)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(xx)
+}
+
+/*
+import (
 	"log"
 
 	// application
@@ -18,8 +47,8 @@ import (
 func main() {
 	var err error
 
-	dbaseDriver := ""
-	dsourceName := ""
+	dbaseDriver := "mysql"
+	dsourceName := "root:Admin123@tcp(db:3306)/hex_test"
 	k8Configfile := ""
 	tusdServer := ""
 
@@ -62,3 +91,4 @@ func main() {
 	HTTPAdapter := HTTP.NewAdapter(applicationAPI)
 	HTTPAdapter.Run()
 }
+*/
