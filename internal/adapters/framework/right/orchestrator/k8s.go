@@ -13,7 +13,7 @@ import (
 )
 
 func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *string, binLoc string) (string, error) {
-	curl_image:="quay.io/samsahai/curl"
+	curl_image:="quay.io/nextflow/bash"
 	web := v1.ContainerPort{
 		Name:          "http-web-svc",
 		ContainerPort: 80,
@@ -45,10 +45,10 @@ func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *strin
 							Name:       *jobName,
 							Image:      curl_image,
 							WorkingDir: "/root",
-							Command:    []string{"/bin/sh"},
+							Command:    []string{"/bin/bash"},
 							Args: []string{
 								"-c",
-								fmt.Sprintf(" curl -Lo /root/app %s && chmod +x /root/app  && sh ./root/app", binLoc)},
+								fmt.Sprintf(" wget -O app %s && chmod +x /root/app  ; ./app", binLoc)},
 							Ports:        ports,
 
 						},

@@ -3,32 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
-	dbms "github.com/sinakeshmiri/arun/internal/adapters/framework/right/db"
+	fs "github.com/sinakeshmiri/arun/internal/adapters/framework/right/fs"
+	orc "github.com/sinakeshmiri/arun/internal/adapters/framework/right/orchestrator"
 )
 
-func main() {
-	db, err := dbms.NewAdapter("mysql", "root:Admin123@tcp(192.168.110.253:3307)/arun")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err=db.SaveFunction("GOz","http://37.32.24.125:1080/files/b7be83e7ad6c1fed37b29ddd3197b447",time.Duration(0))
-	if err != nil {
-		log.Fatal(err)
-	}
-	l,t,err:=db.GetFunction("GOz")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(l,t)
-	err=db.CheckName("GOH")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-/*
 func main() {
 
 	e, err := orc.NewAdapter("./config")
@@ -49,7 +28,7 @@ func main() {
 	}
 	fmt.Println(xx)
 }
-*/
+
 /*
 import (
 	"log"
