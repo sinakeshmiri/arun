@@ -3,21 +3,43 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
-	fs "github.com/sinakeshmiri/arun/internal/adapters/framework/right/fs"
-	orc "github.com/sinakeshmiri/arun/internal/adapters/framework/right/orchestrator"
+	dbms "github.com/sinakeshmiri/arun/internal/adapters/framework/right/db"
 )
 
 func main() {
+	db, err := dbms.NewAdapter("mysql", "root:Admin123@tcp(192.168.110.253:3307)/arun")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err=db.SaveFunction("GOz","http://37.32.24.125:1080/files/b7be83e7ad6c1fed37b29ddd3197b447",time.Duration(0))
+	if err != nil {
+		log.Fatal(err)
+	}
+	l,t,err:=db.GetFunction("GOz")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(l,t)
+	err=db.CheckName("GOH")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+/*
+func main() {
+
 	e, err := orc.NewAdapter("./config")
 	if err != nil {
 		log.Fatal(err)
 	}
-	x, err := fs.NewAdapter("http://172.25.83.242:1080/files/")
+	x, err := fs.NewAdapter("http://37.32.24.125:1080/files/")
 	if err != nil {
 		log.Fatal(err)
 	}
-	t, err := x.SaveBinary("/root/projects/t/app")
+	t, err := x.SaveBinary("app")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +49,7 @@ func main() {
 	}
 	fmt.Println(xx)
 }
-
+*/
 /*
 import (
 	"log"

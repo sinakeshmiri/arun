@@ -46,7 +46,7 @@ CheckName(name string)error*/
 
 // AddToHistory adds the result of an operation to the database history table
 func (da Adapter) SaveFunction(name string, binary string, cost time.Duration) error {
-	queryString, args, err := sq.Insert("functions").Columns("name", "location", "cost").
+	queryString, args, err := sq.Insert("funcs_table").Columns("name", "location", "cost").
 		Values(name, binary, cost).ToSql()
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (da Adapter) SaveFunction(name string, binary string, cost time.Duration) e
 
 // CheckName(name string)error*
 func (da Adapter) CheckName(name string) error {
-	function := sq.Select("*").From("functions")
+	function := sq.Select("*").From("funcs_table")
 
 	active := function.Where(sq.Eq{"name": name})
 
@@ -88,7 +88,7 @@ func (da Adapter) CheckName(name string) error {
 }
 
 func (da Adapter) GetFunction(name string) (string,time.Duration, error) {
-	function := sq.Select("*").From("functions")
+	function := sq.Select("*").From("funcs_table")
 	active := function.Where(sq.Eq{"name": name})
 	queryString, args, err := active.ToSql()
 	if err != nil {

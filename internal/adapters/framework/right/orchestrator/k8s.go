@@ -14,11 +14,6 @@ import (
 
 func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *string, binLoc string) (string, error) {
 	curl_image:="quay.io/samsahai/curl"
-	vol := v1.VolumeMount{
-		MountPath: "/code",
-		Name:      "code-volume",
-	}
-	var perm int32  = 0744
 	web := v1.ContainerPort{
 		Name:          "http-web-svc",
 		ContainerPort: 80,
@@ -45,38 +40,17 @@ func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *strin
 				},
 
 				Spec: v1.PodSpec{
-					Volumes: []v1.Volume{
-						v1.Volume{
-							Name: "code-volume",
-							VolumeSource: v1.VolumeSource{
-								ConfigMap: &v1.ConfigMapVolumeSource{DefaultMode: &perm},
-								EmptyDir: &v1.EmptyDirVolumeSource{},
-							},
-						},
-					},
-					InitContainers: []v1.Container{
-						{
-							Name:       "pod-data-setter",
-							Image:      curl_image,
-							Command:    []string{"/bin/sh"},
-							WorkingDir: "/code",
-							Args: []string{
-								"-c",
-								fmt.Sprintf(" curl -Lo ./app %s  && chmod +x ./app", binLoc)},
-							VolumeMounts: []v1.VolumeMount{vol},
-						},
-					},
 					Containers: []v1.Container{
 						{
 							Name:       *jobName,
-							Image:      "quay.io/geonet/go-scratch",
-							//WorkingDir: "/code",
-							Command:    []string{"/bin/bash"},
+							Image:      curl_image,
+							WorkingDir: "/root",
+							Command:    []string{"/bin/sh"},
 							Args: []string{
 								"-c",
-								"./app "},
+								fmt.Sprintf(" curl -Lo /root/app %s && chmod +x /root/app  && sh ./root/app", binLoc)},
 							Ports:        ports,
-							VolumeMounts: []v1.VolumeMount{vol},
+
 						},
 					},
 					RestartPolicy: v1.RestartPolicyNever,

@@ -1,0 +1,13 @@
+version: "3"
+services:
+  db:
+    image: quay.io/prsurve/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment: 
+      MYSQL_ROOT_PASSWORD: "Admin123"
+      MYSQL_DATABASE: "arun"
+    volumes: 
+      - ./testdb:/docker-entrypoint-initdb.d
+    ports:
+      - "3307:3306"
