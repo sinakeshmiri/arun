@@ -9,6 +9,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	kubernetes "k8s.io/client-go/kubernetes"
 )
 
@@ -76,18 +77,21 @@ func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *strin
 		pods, _ := clientset.CoreV1().Pods("default").List(context.TODO(),
 			metav1.ListOptions{LabelSelector: fmt.Sprintf("arun-slc=%s",*jobName)})
 		for _, j := range pods.Items {
+			log.Println("Created K8s pod successfully:", j.GetName())
 			return j.GetName(), nil
 		}
 	}
+
 
 	//return "", nil
 }
 
 
-func createSvc(clientset *kubernetes.Clientset, jobName string) {
+func createSvc(clientset *kubernetes.Clientset, jobName string) int32{
 	webSrv := v1.ServicePort{
 		Name: jobName,
 		Port: 80,
+		TargetPort:intstr.IntOrString{Type: intstr.Int,IntVal: 80},
 	}
 	portsSrv := []v1.ServicePort{
 		webSrv,
@@ -110,6 +114,6 @@ func createSvc(clientset *kubernetes.Clientset, jobName string) {
 	if err != nil {
 		log.Fatalln("Failed to create K8s service.", err.Error())
 	}
-	fmt.Println(myService.Spec.Ports[0].NodePort)
+	return myService.Spec.Ports[0].NodePort
 
 }

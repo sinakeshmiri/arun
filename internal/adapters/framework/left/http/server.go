@@ -14,12 +14,13 @@ import (
 */
 // Adapter implements the GRPCPort interface
 type Adapter struct {
+	NodeUri string
 	api ports.APIPort
 }
 
 // NewAdapter creates a new Adapter
-func NewAdapter(api ports.APIPort) *Adapter {
-	return &Adapter{api: api}
+func NewAdapter(api ports.APIPort ,nodeUri string) *Adapter {
+	return &Adapter{api: api , NodeUri: nodeUri}
 }
 
 func (httpa Adapter) Run() {
@@ -29,7 +30,8 @@ func (httpa Adapter) Run() {
 
 	// Define your handlers
 	r.POST("/add", httpa.AddFunction)
-	r.Any("/:path", httpa.RunFunction)
+	r.Any("/:id", httpa.RunFunction)
+	r.Any("/", httpa.RunFunction)
 
 	if err := r.Run(); err != nil {
 		log.Printf("Error: %v", err)

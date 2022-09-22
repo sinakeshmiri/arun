@@ -26,13 +26,13 @@ func NewAdapter(configPath string) (*Adapter, error) {
 	return &Adapter{orc: clientset}, nil
 }
 
-func (da Adapter) Run(binary string) (string, error) {
+func (da Adapter) Run(binary string) (string,int32, error) {
 	image := "quay.io/libpod/ubuntu"
 	jname := "arun"+uuid.New().String()
 	name,err:=launchK8sJob(da.orc, &jname, &image, binary)
 	if err != nil {
-		return "", err
+		return "",0,err
 	}
-	createSvc(da.orc, jname)
-	return name,nil
+	rport:=createSvc(da.orc, jname)
+	return name,rport,nil
 }

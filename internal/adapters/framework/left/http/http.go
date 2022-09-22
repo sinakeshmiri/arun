@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,14 +14,15 @@ import (
 )
 
 type AddReq struct {
-	name string `form:"name"`
-	src  string `form:"src"`
+	Name string `json:"name" binding:"required"`
+	Src  string `json:"src" binding:"required"`
 }
 
 func (httpa Adapter) AddFunction(c *gin.Context) {
 	var b AddReq
-	c.Bind(&b)
-	err := httpa.api.AddFunction(b.name, b.src)
+	c.BindJSON(&b)
+	//	fmt.Println(b)
+	err := httpa.api.AddFunction(b.Name, b.Src)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, fmt.Sprintf(`{ERR : "%s"}`, err.Error()))
 	}
@@ -31,13 +33,13 @@ func (httpa Adapter) RunFunction(c *gin.Context) {
 	// step 1: resolve proxy address, change scheme and host in requets
 	req := c.Request
 	fName := req.Header["X-Func"][0]
-	pod, err := httpa.api.RunFunction(fName)
+	_, lport, err := httpa.api.RunFunction(fName)
 	if err != nil {
 		fmt.Println("couldn't run the pod", err)
 		c.String(500, "error")
 		return
 	}
-	podUrl := "http://" + pod
+	podUrl := "http://"+httpa.NodeUri+":" +strconv.Itoa(int(lport))
 	proxy, err := url.Parse(podUrl)
 	if err != nil {
 		log.Printf("error in parse addr: %v", err)
@@ -66,7 +68,7 @@ func (httpa Adapter) RunFunction(c *gin.Context) {
 	bufio.NewReader(resp.Body).WriteTo(c.Writer)
 	t2 := time.Now()
 	diff := t2.Sub(t1)
-	err = httpa.api.UpdateFunction(fName,diff)
+	err = httpa.api.UpdateFunction(fName, diff)
 	if err != nil {
 		log.Printf("error in updating the record: %v", err)
 		c.String(500, "error")

@@ -15,5 +15,9 @@ func NewAdapter() (*Adapter, error) {
 
 // CloseDbConnection closes the db  connection
 func (da Adapter) Compile(src string) (string, error) {
-	return(Make(src))
+	bin,err:=Make(src)
+	if err!=nil{
+		return "",err
+	}
+	return bin,nil
 }

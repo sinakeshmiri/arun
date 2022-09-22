@@ -14,7 +14,7 @@ type DbPort interface {
 
 // K8Port is the port for a kubernetese adapter
 type OrchestratorPort interface {
-	Run(binary string) (string,error)
+	Run(binary string) (string,int32,error)
 }
 
 // TusdPort is the port for a tusd adapter

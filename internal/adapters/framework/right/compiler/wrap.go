@@ -2,6 +2,8 @@ package compiler
 
 import (
 	"archive/zip"
+	b64 "encoding/base64"
+	"fmt"
 
 	"io"
 	"os"
@@ -38,12 +40,17 @@ func Make(src string) (string, error) {
 
 		return "", err
 	}
-	err = unzip("./wrap.zip", buildEnv)
-	if err != nil {
 
+	err = unzip("/home/sina/projects/all-arun/arun/wrap.zip", buildEnv)
+	if err != nil {
+		fmt.Println("wrapper zip not found")
 		return "", err
 	}
-	d1 := []byte(src)
+	d1, err := b64.StdEncoding.DecodeString(src)
+	fmt.Println(string(d1),src)
+	if err != nil {
+		return "", err
+	}
 	err = os.WriteFile(buildEnv+"/packages/function/fucntion.go", d1, 0644)
 	if err != nil {
 

@@ -1,36 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
-	fs "github.com/sinakeshmiri/arun/internal/adapters/framework/right/fs"
-	orc "github.com/sinakeshmiri/arun/internal/adapters/framework/right/orchestrator"
-)
-
-func main() {
-
-	e, err := orc.NewAdapter("./config")
-	if err != nil {
-		log.Fatal(err)
-	}
-	x, err := fs.NewAdapter("http://37.32.24.125:1080/files/")
-	if err != nil {
-		log.Fatal(err)
-	}
-	t, err := x.SaveBinary("app")
-	if err != nil {
-		log.Fatal(err)
-	}
-	xx, err := e.Run(t)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(xx)
-}
-
-/*
-import (
 	"log"
 
 	// application
@@ -49,9 +19,10 @@ func main() {
 	var err error
 
 	dbaseDriver := "mysql"
-	dsourceName := "root:Admin123@tcp(db:3306)/hex_test"
-	k8Configfile := ""
-	tusdServer := ""
+	dsourceName := "root:Admin123@tcp(172.20.0.2:3306)/arun"
+	k8Configfile := "config"
+	tusdServer := "192.168.110.253:1080/files"
+	k8surl:="172.19.0.2"
 
 	dbAdapter, err := db.NewAdapter(dbaseDriver, dsourceName)
 	if err != nil {
@@ -89,7 +60,7 @@ func main() {
 	// that is to be injected into the gRPC adapter will
 	// be of type APIPort which is our hexagons left side
 	// port for driving adapters
-	HTTPAdapter := HTTP.NewAdapter(applicationAPI)
+	HTTPAdapter := HTTP.NewAdapter(applicationAPI,k8surl)
 	HTTPAdapter.Run()
 }
-*/
+

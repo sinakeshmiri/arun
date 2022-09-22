@@ -22,17 +22,17 @@ func NewApplication(
 }
 
 // Run starts the pod
-func (apia Application) RunFunction(name string) (string, error) {
+func (apia Application) RunFunction(name string) (string,int32, error) {
 	binLocation, _, err := apia.db.GetFunction(name)
 	if err != nil {
-		return "", err
+		return "",0,err
 	}
-	podName, err := apia.orc.Run(binLocation)
+	podName,lprot, err := apia.orc.Run(binLocation)
 	if err != nil {
-		return "", err
+		return "",0,err
 	}
 
-	return podName, nil
+	return podName,lprot, nil
 }
 
 func (apia Application) AddFunction(name string, src string) error {
