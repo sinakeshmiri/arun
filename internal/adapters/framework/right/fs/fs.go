@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -30,7 +31,7 @@ func (da Adapter) SaveBinary(binary string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+	fmt.Println(uploader.Url())
 	return uploader.Url(),nil
 }
 

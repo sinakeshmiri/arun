@@ -15,7 +15,7 @@ import (
 )
 
 func builder(filepath string) error {
-
+	os.Setenv("CGO_ENABLED","0" )
 	os.Chdir(filepath)
 	cmd := exec.Command("go", "mod", "tidy")
 	err := cmd.Run()
@@ -23,6 +23,7 @@ func builder(filepath string) error {
 
 		return err
 	}
+
 	cmd = exec.Command("go", "build", "-o", "app", "main.go")
 	err = cmd.Run()
 	if err != nil {

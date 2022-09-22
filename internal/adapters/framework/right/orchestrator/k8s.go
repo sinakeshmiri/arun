@@ -14,10 +14,26 @@ import (
 )
 
 func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *string, binLoc string) (string, error) {
-	curl_image:="quay.io/nextflow/bash"
+	lv_prob := v1.Probe{
+		PeriodSeconds:       1,
+		InitialDelaySeconds: 1,
+
+		ProbeHandler: v1.ProbeHandler{
+			/*Exec: &v1.ExecAction{
+				Command: []string{"ls" , "/root/ap"},
+			},*/
+			TCPSocket: &v1.TCPSocketAction{
+				Port: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 80,
+				},
+			},
+		},
+	}
+	curl_image := "quay.io/nextflow/bash"
 	web := v1.ContainerPort{
 		Name:          "http-web-svc",
-		ContainerPort: 80,
+		ContainerPort: 800,
 	}
 	ports := []v1.ContainerPort{
 		web,
@@ -50,8 +66,9 @@ func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *strin
 							Args: []string{
 								"-c",
 								fmt.Sprintf(" wget -O app %s && chmod +x /root/app  ; ./app", binLoc)},
-							Ports:        ports,
-
+							Ports:         ports,
+							LivenessProbe: &lv_prob,
+							//ReadinessProbe: &lv_prob,
 						},
 					},
 					RestartPolicy: v1.RestartPolicyNever,
@@ -75,23 +92,24 @@ func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *strin
 
 	for {
 		pods, _ := clientset.CoreV1().Pods("default").List(context.TODO(),
-			metav1.ListOptions{LabelSelector: fmt.Sprintf("arun-slc=%s",*jobName)})
+			metav1.ListOptions{LabelSelector: fmt.Sprintf("arun-slc=%s", *jobName)})
 		for _, j := range pods.Items {
-			log.Println("Created K8s pod successfully:", j.GetName())
-			return j.GetName(), nil
+			//return j.GetName(), nil
+			if j.Status.Phase == v1.PodPhase("Running") {
+				log.Println("Created K8s pod successfully:", j.GetName())
+				return j.GetName(), nil
+			}
 		}
 	}
-
 
 	//return "", nil
 }
 
-
-func createSvc(clientset *kubernetes.Clientset, jobName string) int32{
+func createSvc(clientset *kubernetes.Clientset, jobName string) int32 {
 	webSrv := v1.ServicePort{
-		Name: jobName,
-		Port: 80,
-		TargetPort:intstr.IntOrString{Type: intstr.Int,IntVal: 80},
+		Name:       jobName,
+		Port:       80,
+		TargetPort: intstr.IntOrString{Type: intstr.Int, IntVal: 80},
 	}
 	portsSrv := []v1.ServicePort{
 		webSrv,
