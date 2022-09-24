@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	// application
@@ -19,7 +20,7 @@ func main() {
 	var err error
 
 	dbaseDriver := "mysql"
-	dsourceName := "root:Admin123@tcp(72.30.52.64:3307)/arun"
+	dsourceName := "root:Admin123@tcp(172.30.52.64:3307)/arun"
 	k8Configfile := "config"
 	tusdServer := "http://172.30.52.64:1080/files/"
 	k8surl:="192.168.188.129"
@@ -41,6 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initiate orchestrator: %v", err)
 	}
+	fmt.Println("DONE")
 	// core
 	core := function.New()
 

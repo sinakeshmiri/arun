@@ -23,7 +23,12 @@ func builder(filepath string) error {
 
 		return err
 	}
+	/*cmd = exec.Command("cmd", "/C", "set" ,"set","GOOS=linux")
+	err = cmd.Run()
+	if err != nil {
 
+		return err
+	}*/
 	cmd = exec.Command("go", "build", "-o", "app", "main.go")
 	err = cmd.Run()
 	if err != nil {
@@ -35,14 +40,14 @@ func builder(filepath string) error {
 
 func Make(src string) (string, error) {
 	rnd := uuid.New().String()
-	buildEnv := "/tmp/arun-builder-" + rnd
+	buildEnv := "../arun-builder-" + rnd
 	err := os.Mkdir(buildEnv, os.ModePerm)
 	if err != nil {
 
 		return "", err
 	}
 
-	err = unzip("/home/sina/projects/all-arun/arun/wrap.zip", buildEnv)
+	err = unzip("wrap.zip", buildEnv)
 	if err != nil {
 		fmt.Println("wrapper zip not found")
 		return "", err

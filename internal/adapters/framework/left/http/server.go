@@ -34,7 +34,7 @@ func (httpa Adapter) Run() {
 	r.Any("/:id", httpa.RunFunction)
 	r.Any("/", httpa.RunFunction)
 
-	if err := r.Run(); err != nil {
+	if err := r.Run("0.0.0.0:8282"); err != nil {
 		log.Printf("Error: %v", err)
 	}
 }
