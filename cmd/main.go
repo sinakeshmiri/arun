@@ -19,10 +19,10 @@ func main() {
 	var err error
 
 	dbaseDriver := "mysql"
-	dsourceName := "root:Admin123@tcp(192.168.110.253:3307)/arun"
+	dsourceName := "root:Admin123@tcp(72.30.52.64:3307)/arun"
 	k8Configfile := "config"
-	tusdServer := "http://192.168.110.253:1080/files/"
-	k8surl:="172.19.0.2"
+	tusdServer := "http://172.30.52.64:1080/files/"
+	k8surl:="192.168.188.129"
 
 	dbAdapter, err := db.NewAdapter(dbaseDriver, dsourceName)
 	if err != nil {

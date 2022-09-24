@@ -26,6 +26,7 @@ func NewAdapter(api ports.APIPort ,nodeUri string) *Adapter {
 func (httpa Adapter) Run() {
 
 	// Starts a new Gin instance with no middle-ware
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
 	// Define your handlers
