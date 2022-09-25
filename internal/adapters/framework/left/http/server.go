@@ -31,6 +31,7 @@ func (httpa Adapter) Run() {
 
 	// Define your handlers
 	r.POST("/add", httpa.AddFunction)
+	r.GET("/get", httpa.GetFunction)
 	r.Any("/:id", httpa.RunFunction)
 	r.Any("/", httpa.RunFunction)
 

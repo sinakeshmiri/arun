@@ -23,12 +23,6 @@ func builder(filepath string) error {
 
 		return err
 	}
-	/*cmd = exec.Command("cmd", "/C", "set" ,"set","GOOS=linux")
-	err = cmd.Run()
-	if err != nil {
-
-		return err
-	}*/
 	cmd = exec.Command("go", "build", "-o", "app", "main.go")
 	err = cmd.Run()
 	if err != nil {
@@ -46,8 +40,13 @@ func Make(src string) (string, error) {
 
 		return "", err
 	}
-
-	err = unzip("wrap.zip", buildEnv)
+	////
+	_,err=copy("wrap.zip",buildEnv+"/wrap.zip")
+	if err != nil {
+		return "", err
+	}
+	////
+	err = unzip(buildEnv+"/wrap.zip", buildEnv)
 	if err != nil {
 		fmt.Println("wrapper zip not found")
 		return "", err
@@ -106,4 +105,28 @@ func unzip(wrp string, dest string) error {
 		rc.Close()
 	}
 	return nil
+}
+func copy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+			return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+			return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+			return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+			return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }

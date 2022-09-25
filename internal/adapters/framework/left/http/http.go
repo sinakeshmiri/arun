@@ -29,6 +29,19 @@ func (httpa Adapter) AddFunction(c *gin.Context) {
 
 }
 
+
+func (httpa Adapter) GetFunction(c *gin.Context) {
+	functionName := c.Query("fname") // shortcut for c.Request.URL.Query().Get("fname")
+
+	_,dur,err := httpa.api.GetFunction(functionName)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, fmt.Sprintf(`{ERR : "%s"}`, err.Error()))
+	}
+	c.JSON(http.StatusOK,
+		fmt.Sprintf(`{time : "%s",}`, dur.String()))
+}
+
+
 func (httpa Adapter) RunFunction(c *gin.Context) {
 	// step 1: resolve proxy address, change scheme and host in requets
 	req := c.Request
@@ -52,6 +65,11 @@ func (httpa Adapter) RunFunction(c *gin.Context) {
 	// step 2: use http.Transport to do request to real server.
 	transport := http.DefaultTransport
 	resp, err := transport.RoundTrip(req)
+	for i:=0 ; i<5 ; i++{
+		if err != nil {
+			resp, err = transport.RoundTrip(req)
+		}
+	}
 	if err != nil {
 		log.Printf("error in roundtrip: %v", err)
 		c.String(500, "error")
@@ -74,5 +92,5 @@ func (httpa Adapter) RunFunction(c *gin.Context) {
 		c.String(500, "error")
 		return
 	}
-	return
+	//return
 }

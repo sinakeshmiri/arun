@@ -55,6 +55,14 @@ func (apia Application) AddFunction(name string, src string) error {
 	return nil
 }
 
+func (apia Application) GetFunction(name string) (string,time.Duration,error) {
+	loc,dur,err := apia.db.GetFunction(name)
+	if err != nil {
+		return "",time.Duration(0),err
+	}
+	return loc,dur,nil
+}
+
 func (apia Application) UpdateFunction(name string,duration time.Duration) ( error) {
 	src, oldDuration, err := apia.db.GetFunction(name)
 	if err != nil {

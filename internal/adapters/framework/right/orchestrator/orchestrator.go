@@ -15,7 +15,7 @@ type Adapter struct {
 func NewAdapter(configPath string) (*Adapter, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", configPath)
 	if err != nil {
-		log.Fatalln("failed to create K8s config")
+		log.Fatalln("failed to create K8s config",err.Error())
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)

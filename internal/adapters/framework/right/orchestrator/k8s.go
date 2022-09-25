@@ -33,7 +33,7 @@ func launchK8sJob(clientset *kubernetes.Clientset, jobName *string, image *strin
 	curl_image := "quay.io/nextflow/bash"
 	web := v1.ContainerPort{
 		Name:          "http-web-svc",
-		ContainerPort: 800,
+		ContainerPort: 80,
 	}
 	ports := []v1.ContainerPort{
 		web,
